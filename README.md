@@ -1,6 +1,6 @@
 # SwiftUI Masonry
 
-SwiftUI views that arrange their children in a masonry layout.
+SwiftUI views that arrange their children in a Pinterest-like layout.
 
 ![Demo](./Resources/Demo.gif "Demo")
 
