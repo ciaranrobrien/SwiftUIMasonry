@@ -56,7 +56,7 @@ ScrollView(.vertical) {
 
 ### Parameters
 * `axis`: The layout axis of this masonry.
-* `columns`: The number of columns in the masonry.
+* `lines`: The number of lines in the masonry.
 * `placementMode`: The placement of subviews in the masonry.
 * `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
