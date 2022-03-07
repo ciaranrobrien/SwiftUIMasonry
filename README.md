@@ -48,7 +48,7 @@ A view that arranges its children in a masonry.
 ### Usage
 ```swift
 ScrollView(.vertical) {
-    Masonry(.vertical, lines: 2) {
+    Masonry(.vertical, lines: .adaptive(minSize: 140)) {
         //Masonry content
     }
 }
