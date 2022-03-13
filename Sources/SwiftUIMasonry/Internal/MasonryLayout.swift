@@ -6,60 +6,106 @@
 
 import SwiftUI
 
-internal struct MasonryLayout<Content>: View
-where Content : View
+internal struct MasonryLayout<Data, ID, Content>: View
+where Data : RandomAccessCollection,
+      ID : Hashable,
+      Content : View
 {
+    @Environment(\.masonryPlacementMode) private var placementMode
+    
     var axis: Axis
-    var content: () -> Content
+    var content: (() -> Content)?
+    var data: Data?
     var horizontalSpacing: CGFloat
+    var id: KeyPath<Data.Element, ID>?
+    var itemContent: ((Data.Element) -> Content)?
     var lines: MasonryLines
-    var placementMode: MasonryPlacementMode
+    var lineSpan: ((Data.Element) -> MasonryLines)?
     var size: CGSize
     var verticalSpacing: CGFloat
     
     var body: some View {
         var alignments = Array(repeating: CGFloat.zero, count: lineCount)
         var currentIndex = defaultIndex
+        var currentLineSpan = 1
         var top: CGFloat = 0
         
         ZStack(alignment: .topLeading) {
-            content()
-                .frame(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight)
-                .frame(width: axis == .vertical ? lineSize : nil, height: axis == .horizontal ? lineSize : nil)
-                .fixedSize(horizontal: axis == .horizontal, vertical: axis == .vertical)
-                .alignmentGuide(.leading) { dimensions in
-                    switch placementMode {
-                    case .fill:
-                        currentIndex = alignments
-                            .enumerated()
-                            .sorted { $0.element > $1.element }
-                            .first!
-                            .offset
-                        
-                    case .order:
-                        currentIndex += 1
-                        
-                        if currentIndex >= lineCount {
-                            currentIndex = 0
-                        }
-                    }
-                    
+            Group {
+                if let content = content {
+                    content()
+                        .frame(width: axis == .vertical ? lineSize : nil, height: axis == .horizontal ? lineSize : nil)
+                } else if let data = data, let id = id, let itemContent = itemContent {
+                    MasonryDynamicViewBuilder(axis: axis,
+                                              content: itemContent,
+                                              data: data,
+                                              horizontalSpacing: horizontalSpacing,
+                                              id: id,
+                                              lineCount: lineCount,
+                                              lineSize: lineSize,
+                                              lineSpan: lineSpan,
+                                              verticalSpacing: verticalSpacing)
+                }
+            }
+            .fixedSize(horizontal: axis == .horizontal, vertical: axis == .vertical)
+            .alignmentGuide(.leading) { dimensions in
+                func updateCurrentLineSpan() {
                     switch axis {
                     case .horizontal:
-                        let leading = alignments[currentIndex]
-                        top = CGFloat(-currentIndex) * (lineSize + verticalSpacing)
-                        alignments[currentIndex] -= (dimensions.width + horizontalSpacing)
-                        return leading
-                        
+                        currentLineSpan = Int(round((dimensions.height + verticalSpacing) / (lineSize + verticalSpacing)))
                     case .vertical:
-                        top = alignments[currentIndex]
-                        alignments[currentIndex] -= (dimensions.height + verticalSpacing)
-                        return CGFloat(-currentIndex) * (lineSize + horizontalSpacing)
+                        currentLineSpan = Int(round((dimensions.width + horizontalSpacing) / (lineSize + horizontalSpacing)))
                     }
                 }
-                .alignmentGuide(.top) { _ in
-                    top
+                
+                switch placementMode {
+                case .fill:
+                    updateCurrentLineSpan()
+                    
+                    currentIndex = alignments
+                        .enumerated()
+                        .map { enumerated -> (element: CGFloat, offset: Int) in
+                            let element = (0..<currentLineSpan).reduce(enumerated.element) { alignment, span in
+                                guard alignments.indices.contains(enumerated.offset + span)
+                                else { return -.infinity }
+                                return min(alignment, alignments[enumerated.offset + span])
+                            }
+                            return (element, enumerated.offset)
+                        }
+                        .sorted { $0.element > $1.element }
+                        .first!
+                        .offset
+                    
+                case .order:
+                    currentIndex += currentLineSpan
+                    
+                    updateCurrentLineSpan()
+                    
+                    if currentIndex + currentLineSpan > lineCount {
+                        currentIndex = 0
+                    }
                 }
+                
+                switch axis {
+                case .horizontal:
+                    let leading = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
+                    top = CGFloat(-currentIndex) * (lineSize + verticalSpacing)
+                    for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
+                        alignments[index] = leading - dimensions.width - horizontalSpacing
+                    }
+                    return leading
+                    
+                case .vertical:
+                    top = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
+                    for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
+                        alignments[index] = top - dimensions.height - verticalSpacing
+                    }
+                    return CGFloat(-currentIndex) * (lineSize + horizontalSpacing)
+                }
+            }
+            .alignmentGuide(.top) { _ in
+                top
+            }
             
             Color.clear
                 .frame(width: 1, height: 1)
@@ -67,11 +113,11 @@ where Content : View
                 .alignmentGuide(.leading) { _ in
                     alignments = Array(repeating: .zero, count: lineCount)
                     currentIndex = defaultIndex
+                    currentLineSpan = 1
                     top = 0
                     return 0
                 }
         }
-        .offset(offset)
     }
     
     private var defaultIndex: Int {
@@ -93,13 +139,22 @@ where Content : View
             currentSpacing = horizontalSpacing
         }
         
-        let count: Int
+        var count: Int
         let minCount = 1
         let maxCount = max(Int(ceil((currentSize + currentSpacing) / (1 + currentSpacing))), 1)
         
         switch lines {
-        case .adaptive(let minSize, _):
-            count = Int(floor((currentSize + currentSpacing) / (minSize + currentSpacing)))
+        case .adaptive(let sizeConstraint):
+            switch sizeConstraint {
+            case .min(let size):
+                let value = floor((currentSize + currentSpacing) / (max(size, 0) + currentSpacing))
+                count = Int(value.isFinite ? value : 0)
+                
+            case .max(let size):
+                let value = ceil((currentSize + currentSpacing) / (max(size, 0) + currentSpacing))
+                count = Int(value.isFinite ? value : 0)
+            }
+            
         case .fixed(let fixedCount):
             count = fixedCount
         }
@@ -119,61 +174,6 @@ where Content : View
             currentSpacing = horizontalSpacing
         }
         
-        let lineSize = max((currentSize - (currentSpacing * CGFloat(lineCount - 1))) / CGFloat(lineCount), 0)
-        
-        switch lines {
-        case .adaptive(_, let maxSize): return min(maxSize, lineSize)
-        case .fixed: return lineSize
-        }
-    }
-    private var maxHeight: CGFloat? {
-        switch lines {
-        case .adaptive(_, let maxSize):
-            switch axis {
-            case .horizontal: return maxSize
-            case .vertical: return nil
-            }
-        case .fixed: return nil
-        }
-    }
-    private var maxWidth: CGFloat? {
-        switch lines {
-        case .adaptive(_, let maxSize):
-            switch axis {
-            case .horizontal: return nil
-            case .vertical: return maxSize
-            }
-        case .fixed: return nil
-        }
-    }
-    private var minHeight: CGFloat? {
-        switch lines {
-        case .adaptive(let minSize, let maxSize):
-            switch axis {
-            case .horizontal: return min(minSize, maxSize)
-            case .vertical: return nil
-            }
-        case .fixed: return nil
-        }
-    }
-    private var minWidth: CGFloat? {
-        switch lines {
-        case .adaptive(let minSize, let maxSize):
-            switch axis {
-            case .horizontal: return nil
-            case .vertical: return min(minSize, maxSize)
-            }
-        case .fixed: return nil
-        }
-    }
-    private var offset: CGSize {
-        switch axis {
-        case .horizontal:
-            let padding = size.height - (lineSize * CGFloat(lineCount)) - (verticalSpacing * CGFloat(lineCount - 1))
-            return CGSize(width: 0, height: padding / 2)
-        case .vertical:
-            let padding = size.width - (lineSize * CGFloat(lineCount)) - (horizontalSpacing * CGFloat(lineCount - 1))
-            return CGSize(width: padding / 2, height: 0)
-        }
+        return max((currentSize - (currentSpacing * CGFloat(lineCount - 1))) / CGFloat(lineCount), 0)
     }
 }
