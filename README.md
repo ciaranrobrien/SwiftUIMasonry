@@ -18,8 +18,7 @@ ScrollView(.horizontal) {
 
 ### Parameters
 * `rows`: The number of rows in the masonry.
-* `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
-* `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
+* `spacing`: The distance between adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
 
 ## VMasonry
@@ -36,8 +35,7 @@ ScrollView(.vertical) {
 
 ### Parameters
 * `columns`: The number of columns in the masonry.
-* `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
-* `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
+* `spacing`: The distance between adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
 
 ## Masonry
@@ -55,11 +53,12 @@ ScrollView(.vertical) {
 ### Parameters
 * `axis`: The layout axis of this masonry.
 * `lines`: The number of lines in the masonry.
-* `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
-* `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
+* `spacing`: The distance between adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
 
 ## Advanced Usage
+The distance between adjacent subviews can be controlled in both axes using the `horizontalSpacing` and `verticalSpacing` parameters, instead of the `spacing` parameter.
+
 The `lines`, `columns` and `rows` parameters can be initialised with one of the `MasonryLines` cases:
 * `adaptive`: A variable number of lines. This case uses the provided `sizeConstraint` to decide the exact number of lines.
 * `fixed`: A constant number of lines.
