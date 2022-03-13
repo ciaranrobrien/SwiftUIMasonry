@@ -57,7 +57,7 @@ ScrollView(.vertical) {
 * `content`: A view builder that creates the content of this masonry.
 
 ## Advanced Usage
-The distance between adjacent subviews can be controlled in both axes using the `horizontalSpacing` and `verticalSpacing` parameters, instead of the `spacing` parameter.
+The distance between adjacent subviews can be controlled in both axes, by using the `horizontalSpacing` and `verticalSpacing` parameters instead of the `spacing` parameter.
 
 The `lines`, `columns` and `rows` parameters can be initialised with one of the `MasonryLines` cases:
 * `adaptive`: A variable number of lines. This case uses the provided `sizeConstraint` to decide the exact number of lines.
