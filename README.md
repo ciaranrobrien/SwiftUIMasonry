@@ -18,7 +18,6 @@ ScrollView(.horizontal) {
 
 ### Parameters
 * `rows`: The number of rows in the masonry.
-* `placementMode`: The placement of subviews in the masonry.
 * `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
@@ -37,7 +36,6 @@ ScrollView(.vertical) {
 
 ### Parameters
 * `columns`: The number of columns in the masonry.
-* `placementMode`: The placement of subviews in the masonry.
 * `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
@@ -48,7 +46,7 @@ A view that arranges its children in a masonry.
 ### Usage
 ```swift
 ScrollView(.vertical) {
-    Masonry(.vertical, lines: .adaptive(minSize: 140)) {
+    Masonry(.vertical, lines: 2) {
         //Masonry content
     }
 }
@@ -57,10 +55,20 @@ ScrollView(.vertical) {
 ### Parameters
 * `axis`: The layout axis of this masonry.
 * `lines`: The number of lines in the masonry.
-* `placementMode`: The placement of subviews in the masonry.
 * `horizontalSpacing`: The distance between horizontally adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `verticalSpacing`: The distance between vertically adjacent subviews, or `nil` if you want the masonry to choose a default distance for each pair of subviews.
 * `content`: A view builder that creates the content of this masonry.
+
+## Advanced Usage
+The `lines`, `columns` and `rows` parameters can be initialised with one of the `MasonryLines` cases:
+* `adaptive`: A variable number of lines. This case uses the provided `sizeConstraint` to decide the exact number of lines.
+* `fixed`: A constant number of lines.
+
+Masonry views can be initialised with a data source using the `data` and `id` parameters, where `content` builds each child view dynamically from the data source. Using these initialisers also provides access to the `lineSpan`, `columnSpan` and `rowSpan` parameters; return an `Int` or a `MasonryLines` case to set the number of lines a child view will span across.
+
+The `masonryPlacementMode` view modifier can be used to control how masonry views place their children. Provide a `MasonryPlacementMode` case:
+* `fill`: Place each subview in the line with the most available space. This is the default behaviour.
+* `order`: Place each subview in view tree order.
 
 ## Requirements
 
