@@ -1,6 +1,6 @@
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2022
+*  Copyright (c) Ciaran O'Brien 2025
 *  MIT license, see LICENSE file for details
 */
 
@@ -17,16 +17,16 @@ where Data : RandomAccessCollection,
     var horizontalSpacing: CGFloat
     var id: KeyPath<Data.Element, ID>
     var lineCount: Int
-    var lineSize: CGFloat
+    var lineLength: CGFloat
     var lineSpan: ((Data.Element) -> MasonryLines)?
     var verticalSpacing: CGFloat
     
     var body: some View {
         ForEach(data, id: id) { element in
-            let size = itemSize(element)
+            let length = itemLength(element)
             
             content(element)
-                .frame(width: axis == .vertical ? size : nil, height: axis == .horizontal ? size : nil)
+                .frame(width: axis == .vertical ? length : nil, height: axis == .horizontal ? length : nil)
         }
     }
     
@@ -37,22 +37,22 @@ where Data : RandomAccessCollection,
         }
     }
     
-    private func itemSize(_ element: Data.Element) -> CGFloat {
-        guard lineSize > 0
+    private func itemLength(_ element: Data.Element) -> CGFloat {
+        guard lineLength > 0
         else { return 0 }
         
         let elementLines = lineSpan?(element) ?? .fixed(1)
         var lineSpan: Int
 
         switch elementLines {
-        case .adaptive(let sizeConstraint):
-            switch sizeConstraint {
-            case .min(let size):
-                let value = floor(size / lineSize)
+        case .adaptive(let lengthConstraint):
+            switch lengthConstraint {
+            case .min(let length):
+                let value = floor(length / lineLength)
                 lineSpan = Int(value.isFinite ? value : 0)
                 
-            case .max(let size):
-                let value = ceil(size / lineSize)
+            case .max(let length):
+                let value = ceil(length / lineLength)
                 lineSpan = Int(value.isFinite ? value : 0)
             }
             
@@ -60,6 +60,6 @@ where Data : RandomAccessCollection,
             lineSpan = count
         }
         
-        return ((lineSize + currentSpacing) * CGFloat(min(max(lineSpan, 1), lineCount))) - currentSpacing
+        return ((lineLength + currentSpacing) * CGFloat(min(max(lineSpan, 1), lineCount))) - currentSpacing
     }
 }

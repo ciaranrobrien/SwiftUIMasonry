@@ -1,20 +1,9 @@
-//
-//  SwiftUIView.swift
-//  
-//
-//  Created by Ciaran O'Brien on 02/04/2022.
-//
+/**
+*  SwiftUIMasonry
+*  Copyright (c) Ciaran O'Brien 2025
+*  MIT license, see LICENSE file for details
+*/
 
-import SwiftUI
+import CoreGraphics
 
-struct SwiftUIView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
-
-struct SwiftUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        SwiftUIView()
-    }
-}
+internal let defaultSpacing: CGFloat = 8

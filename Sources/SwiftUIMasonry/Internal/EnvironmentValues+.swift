@@ -1,6 +1,6 @@
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2022
+*  Copyright (c) Ciaran O'Brien 2025
 *  MIT license, see LICENSE file for details
 */
 

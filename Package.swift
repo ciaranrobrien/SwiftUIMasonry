@@ -1,8 +1,8 @@
-// swift-tools-version: 5.5
+// swift-tools-version: 6.2
 
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2022
+*  Copyright (c) Ciaran O'Brien 2025
 *  MIT license, see LICENSE file for details
 */
 
@@ -15,17 +15,20 @@ let package = Package(
         .macCatalyst(.v14),
         .macOS(.v11),
         .tvOS(.v14),
-        .watchOS(.v7)
+        .watchOS(.v7),
+        .visionOS(.v1)
     ],
     products: [
         .library(
             name: "SwiftUIMasonry",
-            targets: ["SwiftUIMasonry"]),
+            targets: ["SwiftUIMasonry"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "SwiftUIMasonry",
-            dependencies: [])
+            dependencies: []
+        )
     ]
 )

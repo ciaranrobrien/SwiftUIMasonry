@@ -1,6 +1,6 @@
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2022
+*  Copyright (c) Ciaran O'Brien 2025
 *  MIT license, see LICENSE file for details
 */
 
@@ -13,16 +13,18 @@ where Data : RandomAccessCollection,
 {
     public var body: some View {
         GeometryReader { geometry in
-            MasonryLayout(axis: axis,
-                          content: content,
-                          data: data,
-                          horizontalSpacing: max(horizontalSpacing ?? 8, 0),
-                          id: id,
-                          itemContent: itemContent,
-                          lines: lines,
-                          lineSpan: lineSpan,
-                          size: geometry.size,
-                          verticalSpacing: max(verticalSpacing ?? 8, 0))
+            MasonryLayout(
+                axis: axis,
+                content: content,
+                data: data,
+                horizontalSpacing: max(horizontalSpacing ?? defaultSpacing, 0),
+                id: id,
+                itemContent: itemContent,
+                lines: lines,
+                lineSpan: lineSpan,
+                size: geometry.size,
+                verticalSpacing: max(verticalSpacing ?? defaultSpacing, 0)
+            )
             .transaction {
                 updateTransaction($0)
             }
@@ -41,8 +43,10 @@ where Data : RandomAccessCollection,
                 .hidden()
             )
         }
-        .frame(width: axis == .horizontal ? contentSize.width : nil,
-               height: axis == .vertical ? contentSize.height : nil)
+        .frame(
+            width: axis == .horizontal ? contentSize.width : nil,
+            height: axis == .vertical ? contentSize.height : nil
+        )
     }
     
     @State private var contentSize = CGSize.zero
@@ -98,33 +102,6 @@ where Data == [Never],
     /// - Parameters:
     ///   - axis: The layout axis of this masonry.
     ///   - lines: The number of lines in the masonry.
-    ///   - spacing: The distance between adjacent subviews, or `nil` if you
-    ///     want the masonry to choose a default distance for each pair of
-    ///     subviews.
-    ///   - content: A view builder that creates the content of this masonry.
-    init(_ axis: Axis,
-         lines: Int,
-         spacing: CGFloat? = nil,
-         @ViewBuilder content: @escaping () -> Content)
-    {
-        self.axis = axis
-        self.content = content
-        self.data = nil
-        self.horizontalSpacing = spacing
-        self.id = nil
-        self.itemContent = nil
-        self.lines = .fixed(lines)
-        self.lineSpan = nil
-        self.verticalSpacing = spacing
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
     ///   - horizontalSpacing: The distance between horizontally adjacent
     ///     subviews, or `nil` if you want the masonry to choose a default distance
     ///     for each pair of subviews.
@@ -145,37 +122,6 @@ where Data == [Never],
         self.id = nil
         self.itemContent = nil
         self.lines = lines
-        self.lineSpan = nil
-        self.verticalSpacing = verticalSpacing
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
-    ///   - horizontalSpacing: The distance between horizontally adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - verticalSpacing: The distance between vertically adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - content: A view builder that creates the content of this masonry.
-    init(_ axis: Axis,
-         lines: Int,
-         horizontalSpacing: CGFloat? = nil,
-         verticalSpacing: CGFloat? = nil,
-         @ViewBuilder content: @escaping () -> Content)
-    {
-        self.axis = axis
-        self.content = content
-        self.data = nil
-        self.horizontalSpacing = horizontalSpacing
-        self.id = nil
-        self.itemContent = nil
-        self.lines = .fixed(lines)
         self.lineSpan = nil
         self.verticalSpacing = verticalSpacing
     }
@@ -225,45 +171,6 @@ public extension Masonry {
     /// - Parameters:
     ///   - axis: The layout axis of this masonry.
     ///   - lines: The number of lines in the masonry.
-    ///   - spacing: The distance between adjacent subviews, or `nil` if you
-    ///     want the masonry to choose a default distance for each pair of
-    ///     subviews.
-    ///   - data: The data that the masonry uses to create views dynamically.
-    ///   - id: The key path to the provided data's identifier.
-    ///   - content: A view builder that creates the content of this masonry.
-    ///   - lineSpan: The number of lines the content for a given element will
-    ///     span.
-    init(_ axis: Axis,
-         lines: MasonryLines,
-         spacing: CGFloat? = nil,
-         data: Data,
-         id: KeyPath<Data.Element, ID>,
-         @ViewBuilder content: @escaping (Data.Element) -> Content,
-         lineSpan: ((Data.Element) -> Int)?)
-    {
-        self.axis = axis
-        self.content = nil
-        self.data = data
-        self.horizontalSpacing = spacing
-        self.id = id
-        self.itemContent = content
-        self.lines = lines
-        self.verticalSpacing = spacing
-        
-        if let lineSpan = lineSpan {
-            self.lineSpan = { .fixed(lineSpan($0)) }
-        } else {
-            self.lineSpan = nil
-        }
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
     ///   - horizontalSpacing: The distance between horizontally adjacent
     ///     subviews, or `nil` if you want the masonry to choose a default distance
     ///     for each pair of subviews.
@@ -293,49 +200,6 @@ public extension Masonry {
         self.lines = lines
         self.lineSpan = lineSpan
         self.verticalSpacing = verticalSpacing
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
-    ///   - horizontalSpacing: The distance between horizontally adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - verticalSpacing: The distance between vertically adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - data: The data that the masonry uses to create views dynamically.
-    ///   - id: The key path to the provided data's identifier.
-    ///   - content: A view builder that creates the content of this masonry.
-    ///   - lineSpan: The number of lines the content for a given element will
-    ///     span.
-    init(_ axis: Axis,
-         lines: MasonryLines,
-         horizontalSpacing: CGFloat? = nil,
-         verticalSpacing: CGFloat? = nil,
-         data: Data,
-         id: KeyPath<Data.Element, ID>,
-         @ViewBuilder content: @escaping (Data.Element) -> Content,
-         lineSpan: ((Data.Element) -> Int)?)
-    {
-        self.axis = axis
-        self.content = nil
-        self.data = data
-        self.horizontalSpacing = horizontalSpacing
-        self.id = id
-        self.itemContent = content
-        self.lines = lines
-        self.verticalSpacing = verticalSpacing
-        
-        if let lineSpan = lineSpan {
-            self.lineSpan = { .fixed(lineSpan($0)) }
-        } else {
-            self.lineSpan = nil
-        }
     }
 }
 
@@ -385,44 +249,6 @@ where Data.Element : Identifiable,
     /// - Parameters:
     ///   - axis: The layout axis of this masonry.
     ///   - lines: The number of lines in the masonry.
-    ///   - spacing: The distance between adjacent subviews, or `nil` if you
-    ///     want the masonry to choose a default distance for each pair of
-    ///     subviews.
-    ///   - data: The identified data that the masonry uses to create views
-    ///     dynamically.
-    ///   - content: A view builder that creates the content of this masonry.
-    ///   - lineSpan: The number of lines the content for a given element will
-    ///     span.
-    init(_ axis: Axis,
-         lines: MasonryLines,
-         spacing: CGFloat? = nil,
-         data: Data,
-         @ViewBuilder content: @escaping (Data.Element) -> Content,
-         lineSpan: ((Data.Element) -> Int)?)
-    {
-        self.axis = axis
-        self.content = nil
-        self.data = data
-        self.horizontalSpacing = spacing
-        self.id = \.id
-        self.itemContent = content
-        self.lines = lines
-        self.verticalSpacing = spacing
-        
-        if let lineSpan = lineSpan {
-            self.lineSpan = { .fixed(lineSpan($0)) }
-        } else {
-            self.lineSpan = nil
-        }
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
     ///   - horizontalSpacing: The distance between horizontally adjacent
     ///     subviews, or `nil` if you want the masonry to choose a default distance
     ///     for each pair of subviews.
@@ -451,48 +277,6 @@ where Data.Element : Identifiable,
         self.lines = lines
         self.lineSpan = lineSpan
         self.verticalSpacing = verticalSpacing
-    }
-    
-    /// A view that arranges its children in a masonry.
-    ///
-    /// This view returns a flexible preferred size, orthogonal to the layout axis, to its parent layout.
-    ///
-    /// - Parameters:
-    ///   - axis: The layout axis of this masonry.
-    ///   - lines: The number of lines in the masonry.
-    ///   - horizontalSpacing: The distance between horizontally adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - verticalSpacing: The distance between vertically adjacent
-    ///     subviews, or `nil` if you want the masonry to choose a default distance
-    ///     for each pair of subviews.
-    ///   - data: The identified data that the masonry uses to create views
-    ///     dynamically.
-    ///   - content: A view builder that creates the content of this masonry.
-    ///   - lineSpan: The number of lines the content for a given element will
-    ///     span.
-    init(_ axis: Axis,
-         lines: MasonryLines,
-         horizontalSpacing: CGFloat? = nil,
-         verticalSpacing: CGFloat? = nil,
-         data: Data,
-         @ViewBuilder content: @escaping (Data.Element) -> Content,
-         lineSpan: ((Data.Element) -> Int)?)
-    {
-        self.axis = axis
-        self.content = nil
-        self.data = data
-        self.horizontalSpacing = horizontalSpacing
-        self.id = \.id
-        self.itemContent = content
-        self.lines = lines
-        self.verticalSpacing = verticalSpacing
-        
-        if let lineSpan = lineSpan {
-            self.lineSpan = { .fixed(lineSpan($0)) }
-        } else {
-            self.lineSpan = nil
-        }
     }
 }
 

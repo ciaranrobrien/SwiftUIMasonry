@@ -1,6 +1,6 @@
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2022
+*  Copyright (c) Ciaran O'Brien 2025
 *  MIT license, see LICENSE file for details
 */
 
@@ -8,7 +8,7 @@ import SwiftUI
 
 /// Constants that define how a masonry's subviews are placed in the available
 /// space.
-public enum MasonryPlacementMode: Hashable, CaseIterable {
+public enum MasonryPlacementMode: CaseIterable, Hashable, Sendable {
     
     /// Place each subview in the line with the most available space.
     case fill
