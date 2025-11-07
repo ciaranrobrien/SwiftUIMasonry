@@ -72,14 +72,9 @@ The `masonryPlacementMode` view modifier can be used to control how masonry view
 ## Requirements
 
 * iOS 14.0+, macOS 11.0+, tvOS 14.0+ or watchOS 7.0+
-* Xcode 12.0+
+* Xcode 26.0+
 
 ## Installation
 
 * Install with [Swift Package Manager](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
 * Import `SwiftUIMasonry` to start using.
-
-## Contact
-
-[@ciaranrobrien](https://twitter.com/ciaranrobrien) on Twitter.
-
