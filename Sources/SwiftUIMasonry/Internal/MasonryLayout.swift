@@ -25,15 +25,21 @@ where Data : RandomAccessCollection,
     var verticalSpacing: CGFloat
     
     var body: some View {
+        let axis = axis
         let defaultIndex = defaultIndex
+        let horizontalSpacing = horizontalSpacing
         let lineCount = lineCount
         let lineLength = lineLength(for: lineCount)
-        
-        var alignments = Array(repeating: CGFloat.zero, count: lineCount)
-        var currentIndex = defaultIndex
-        var currentLineSpan = 1
-        var top: CGFloat = 0
-        
+        let placementMode = placementMode
+        let verticalSpacing = verticalSpacing
+
+        // Safety: alignment guides run synchronously on the main thread during layout,
+        // so these variables are never accessed concurrently.
+        nonisolated(unsafe) var alignments = Array(repeating: CGFloat.zero, count: lineCount)
+        nonisolated(unsafe) var currentIndex = defaultIndex
+        nonisolated(unsafe) var currentLineSpan = 1
+        nonisolated(unsafe) var top: CGFloat = 0
+
         ZStack(alignment: .topLeading) {
             Group {
                 if let content {
@@ -59,81 +65,74 @@ where Data : RandomAccessCollection,
             .fixedSize(horizontal: axis == .horizontal, vertical: axis == .vertical)
             .alignmentGuide(.leading) { dimensions in
                 let dimensions = CGSize(width: dimensions.width, height: dimensions.height)
-                
-                return MainActor.assumeIsolated {
-                    @MainActor
-                    func updateCurrentLineSpan() {
-                        currentLineSpan = switch axis {
-                        case .horizontal:
-                            Int(round((dimensions.height + verticalSpacing) / (lineLength + verticalSpacing)))
-                        case .vertical:
-                            Int(round((dimensions.width + horizontalSpacing) / (lineLength + horizontalSpacing)))
-                        }
-                    }
-                    
-                    switch placementMode {
-                    case .fill:
-                        updateCurrentLineSpan()
-                        
-                        currentIndex = alignments
-                            .enumerated()
-                            .map { enumerated -> (element: CGFloat, offset: Int) in
-                                let element = (0..<currentLineSpan).reduce(enumerated.element) { alignment, span in
-                                    guard alignments.indices.contains(enumerated.offset + span)
-                                    else { return -.infinity }
-                                    return min(alignment, alignments[enumerated.offset + span])
-                                }
-                                return (element, enumerated.offset)
-                            }
-                            .sorted { $0.element > $1.element }
-                            .first!
-                            .offset
-                        
-                    case .order:
-                        currentIndex += currentLineSpan
-                        
-                        updateCurrentLineSpan()
-                        
-                        if currentIndex + currentLineSpan > lineCount {
-                            currentIndex = 0
-                        }
-                    }
-                    
-                    switch axis {
+
+                func updateCurrentLineSpan() {
+                    currentLineSpan = switch axis {
                     case .horizontal:
-                        let leading = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
-                        top = CGFloat(-currentIndex) * (lineLength + verticalSpacing)
-                        for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
-                            alignments[index] = leading - dimensions.width - horizontalSpacing
-                        }
-                        return leading
-                        
+                        Int(round((dimensions.height + verticalSpacing) / (lineLength + verticalSpacing)))
                     case .vertical:
-                        top = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
-                        for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
-                            alignments[index] = top - dimensions.height - verticalSpacing
-                        }
-                        return CGFloat(-currentIndex) * (lineLength + horizontalSpacing)
+                        Int(round((dimensions.width + horizontalSpacing) / (lineLength + horizontalSpacing)))
                     }
+                }
+
+                switch placementMode {
+                case .fill:
+                    updateCurrentLineSpan()
+
+                    currentIndex = alignments
+                        .enumerated()
+                        .map { enumerated -> (element: CGFloat, offset: Int) in
+                            let element = (0..<currentLineSpan).reduce(enumerated.element) { alignment, span in
+                                guard alignments.indices.contains(enumerated.offset + span)
+                                else { return -.infinity }
+                                return min(alignment, alignments[enumerated.offset + span])
+                            }
+                            return (element, enumerated.offset)
+                        }
+                        .sorted { $0.element > $1.element }
+                        .first!
+                        .offset
+
+                case .order:
+                    currentIndex += currentLineSpan
+
+                    updateCurrentLineSpan()
+
+                    if currentIndex + currentLineSpan > lineCount {
+                        currentIndex = 0
+                    }
+                }
+
+                switch axis {
+                case .horizontal:
+                    let leading = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
+                    top = CGFloat(-currentIndex) * (lineLength + verticalSpacing)
+                    for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
+                        alignments[index] = leading - dimensions.width - horizontalSpacing
+                    }
+                    return leading
+
+                case .vertical:
+                    top = alignments[currentIndex..<min(currentIndex + currentLineSpan, lineCount)].min()!
+                    for index in currentIndex..<min(currentIndex + currentLineSpan, lineCount) {
+                        alignments[index] = top - dimensions.height - verticalSpacing
+                    }
+                    return CGFloat(-currentIndex) * (lineLength + horizontalSpacing)
                 }
             }
             .alignmentGuide(.top) { _ in
-                MainActor.assumeIsolated {
-                    top
-                }
+                top
             }
-            
+
             Color.clear
                 .frame(width: 1, height: 1)
                 .hidden()
                 .alignmentGuide(.leading) { _ in
-                    MainActor.assumeIsolated {
-                        alignments = Array(repeating: .zero, count: lineCount)
-                        currentIndex = defaultIndex
-                        currentLineSpan = 1
-                        top = 0
-                        return 0
-                    }
+                    alignments = Array(repeating: .zero, count: lineCount)
+                    currentIndex = defaultIndex
+                    currentLineSpan = 1
+                    top = 0
+                    return 0
                 }
         }
     }
