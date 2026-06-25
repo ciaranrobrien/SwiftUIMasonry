@@ -1,5 +1,6 @@
 # SwiftUI Masonry
 SwiftUI layouts that arrange their subviews in a Pinterest-like grid.
+
 ![Demo](./Resources/Demo.gif "Demo")
 
 ## VMasonry
