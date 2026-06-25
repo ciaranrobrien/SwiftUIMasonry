@@ -129,7 +129,7 @@ public extension HMasonry {
         cache.heightValues.removeAll()
     }
     
-    final class Cache {
+    struct Cache {
         internal var heightValues = [CGFloat : CachedValues]()
     }
 }

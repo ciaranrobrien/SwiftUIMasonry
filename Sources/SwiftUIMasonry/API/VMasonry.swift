@@ -8,10 +8,9 @@ import SwiftUI
 
 /// A layout that arranges its subviews in a vertical masonry.
 public struct VMasonry: Layout {
-    @Environment(\.masonryPlacementMode) internal var placementMode
-    
     internal var columnCount: MasonryColumnCount
     internal var horizontalSpacing: CGFloat
+    internal var placementMode: MasonryPlacementMode
     internal var verticalSpacing: CGFloat
 }
 
@@ -25,11 +24,14 @@ public extension VMasonry {
     ///   - spacing: The distance between adjacent subviews, or `nil` if you
     ///     want the masonry to choose a default distance for each pair of
     ///     subviews.
+    ///   - placementMode: The placement mode for subviews in this masonry.
     init(columns columnCount: MasonryColumnCount,
-         spacing: CGFloat? = nil)
+         spacing: CGFloat? = nil,
+         placementMode: MasonryPlacementMode = defaultPlacementMode)
     {
         self.columnCount = columnCount
         self.horizontalSpacing = spacing ?? defaultSpacing
+        self.placementMode = placementMode
         self.verticalSpacing = spacing ?? defaultSpacing
     }
     
@@ -43,12 +45,15 @@ public extension VMasonry {
     ///   - verticalSpacing: The distance between vertically adjacent
     ///     subviews, or `nil` if you want the masonry to choose a default distance
     ///     for each pair of subviews.
+    ///   - placementMode: The placement mode for subviews in this masonry.
     init(columns columnCount: MasonryColumnCount,
          horizontalSpacing: CGFloat? = nil,
-         verticalSpacing: CGFloat? = nil)
+         verticalSpacing: CGFloat? = nil,
+         placementMode: MasonryPlacementMode = defaultPlacementMode)
     {
         self.columnCount = columnCount
         self.horizontalSpacing = horizontalSpacing ?? defaultSpacing
+        self.placementMode = placementMode
         self.verticalSpacing = verticalSpacing ?? defaultSpacing
     }
 }

@@ -6,4 +6,5 @@
 
 import CoreGraphics
 
-internal let defaultSpacing: CGFloat = 8
+@usableFromInline internal let defaultPlacementMode = MasonryPlacementMode.fill
+@usableFromInline internal let defaultSpacing: CGFloat = 8

@@ -129,7 +129,7 @@ public extension VMasonry {
         cache.widthValues.removeAll()
     }
     
-    final class Cache {
+    struct Cache {
         internal var widthValues = [CGFloat : CachedValues]()
     }
 }

@@ -8,11 +8,6 @@ import SwiftUI
 
 public extension View {
     
-    /// Sets the placement mode for masonry layouts within this view.
-    func masonryPlacementMode(_ mode: MasonryPlacementMode) -> some View {
-        environment(\.masonryPlacementMode, mode)
-    }
-    
     /// Sets the number of rows this subview will span in a parent HMasonry layout.
     func masonryRowSpan(_ rowCount: MasonryRowCount) -> some View {
         layoutValue(key: MasonryRowSpanKey.self, value: rowCount)
