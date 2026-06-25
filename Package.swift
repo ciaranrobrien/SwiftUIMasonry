@@ -2,7 +2,7 @@
 
 /**
 *  SwiftUIMasonry
-*  Copyright (c) Ciaran O'Brien 2025
+*  Copyright (c) Ciaran O'Brien 2026
 *  MIT license, see LICENSE file for details
 */
 
@@ -11,12 +11,12 @@ import PackageDescription
 let package = Package(
     name: "SwiftUIMasonry",
     platforms: [
-        .iOS(.v14),
-        .macCatalyst(.v14),
-        .macOS(.v11),
-        .tvOS(.v14),
-        .watchOS(.v7),
-        .visionOS(.v1)
+        .iOS(.v16),
+        .macCatalyst(.v16),
+        .macOS(.v13),
+        .tvOS(.v16),
+        .visionOS(.v1),
+        .watchOS(.v9)
     ],
     products: [
         .library(
